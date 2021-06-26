@@ -131,3 +131,7 @@ dmypy.json
 # Misc
 nohup.out
 *.env
+*.xlsx
+!sample_addresses.xlsx
+!sample_result.xlsx
+

@@ -12,13 +12,16 @@ import time
 # https://positionstack.com/documentation
 
 api_key = None
+process_mode = 1    # 1 = only if coordinates are empty
+                    # 2 = also process if confidence is below 1
 
-def get_coordinates(address:str, zipcode:str, city:str):
+def get_coordinates(address:str, zipcode:str, city:str, country_code:str):
 
     url = "http://api.positionstack.com/v1/forward"
     url += f"?access_key={api_key}"
     q = f"{address}, {zipcode} {city}"
     url += f"&query={urllib.parse.quote(q)}"
+    url += f"&country={urllib.parse.quote(country_code)}"
     response = requests.get(url)
     if response.status_code == 200:
         js = response.json()
@@ -26,12 +29,13 @@ def get_coordinates(address:str, zipcode:str, city:str):
             data = js["data"]
             if len(data) >= 1:
                 rec1 = data[0]
+                # print(rec1)
                 if rec1 == []:
                     return None
                 return rec1
     else:
         print(f"Error {response.status_code} : {url}")
-    
+
     return None
 
 def add_cell(sheet, column, row, value, bold = False):
@@ -41,62 +45,94 @@ def add_cell(sheet, column, row, value, bold = False):
     if bold:
         c.font = Font(bold = True)
 
-def process(infile:str, outfile:str):
+def process(infile:str):
     print("Reading...")
     workbook = load_workbook(infile)
     worksheet = workbook.active
 
-    workbook_out = Workbook()
-    worksheet_out = workbook_out.active
-    worksheet_out.title = "GEO"
-
-    add_cell(worksheet_out, 1, 1, "Name", bold = True)
-    add_cell(worksheet_out, 2, 1, "Address", bold = True)
-    add_cell(worksheet_out, 3, 1, "PostalCode", bold = True)
-    add_cell(worksheet_out, 4, 1, "City", bold = True)
-    add_cell(worksheet_out, 5, 1, "Phone", bold = True)
-    add_cell(worksheet_out, 6, 1, "Email", bold = True)
-    add_cell(worksheet_out, 7, 1, "Latitude", bold = True)
-    add_cell(worksheet_out, 8, 1, "Longitude", bold = True)
-    add_cell(worksheet_out, 9, 1, "Confidence", bold = True)
-    add_cell(worksheet_out, 10, 1, "Label", bold = True)
+    add_cell(worksheet, 9, 1, "Latitude", bold = True)
+    add_cell(worksheet, 10, 1, "Longitude", bold = True)
+    add_cell(worksheet, 11, 1, "Confidence", bold = True)
+    add_cell(worksheet, 12, 1, "Region", bold = True)
+    add_cell(worksheet, 13, 1, "Region_Code", bold = True)
+    add_cell(worksheet, 14, 1, "County", bold = True)
+    add_cell(worksheet, 15, 1, "Locality", bold = True)
+    add_cell(worksheet, 16, 1, "Area", bold = True)
+    add_cell(worksheet, 17, 1, "Neighbourhood", bold = True)
+    add_cell(worksheet, 18, 1, "Country", bold = True)
+    add_cell(worksheet, 19, 1, "Country Code", bold = True)
+    add_cell(worksheet, 20, 1, "Continent", bold = True)
+    add_cell(worksheet, 21, 1, "Label", bold = True)
 
     print("Processing...")
-    line = 2
-    #line = 789
+    line = 1
+    changed = False
     while True:
+        line += 1
         name = worksheet[f"A{line}"].value
         if name == "" or name is None:
             break
         address = worksheet[f"B{line}"].value
         zipcode = worksheet[f"C{line}"].value
         city = worksheet[f"D{line}"].value
-        phone = worksheet[f"E{line}"].value
-        email = worksheet[f"F{line}"].value
+        _ = worksheet[f"E{line}"].value
+        _ = worksheet[f"F{line}"].value
+        _ = worksheet[f"G{line}"].value
+        country_code = worksheet[f"H{line}"].value
 
-        add_cell(worksheet_out, 1, line, name)
-        add_cell(worksheet_out, 2, line, address)
-        add_cell(worksheet_out, 3, line, zipcode)
-        add_cell(worksheet_out, 4, line, city)
-        add_cell(worksheet_out, 5, line, phone)
-        add_cell(worksheet_out, 6, line, email)
+        latitude = worksheet[f"I{line}"].value
+        longitude = worksheet[f"J{line}"].value
+        confidence = worksheet[f"K{line}"].value
+
+        if process_mode == 1:
+            if latitude is None or longitude is None:
+                pass
+            else:
+                continue
+        else:
+            if latitude is None or longitude is None or confidence != 1:
+                pass
+            else:
+                continue
 
         try:
-            coords = get_coordinates(address, zipcode, city)
+            changed = True
+            coords = get_coordinates(address, zipcode, city, country_code)
             if coords is not None:
                 latitude = coords["latitude"]
                 longitude = coords["longitude"]
-                label = coords["label"]
                 confidence = coords["confidence"]
+
+                region = coords["region"]
+                region_code = coords["region_code"]
+                county = coords["county"]
+                locality = coords["locality"]
+                administrative_area = coords["administrative_area"]
+                neighbourhood = coords["neighbourhood"]
+                country = coords["country"]
+                country_code = coords["country_code"]
+                continent = coords["continent"]
+                label = coords["label"]
 
                 print(f"{name} => {latitude},{longitude}")
 
-                add_cell(worksheet_out, 7, line, latitude)
-                add_cell(worksheet_out, 8, line, longitude)
-                add_cell(worksheet_out, 9, line, confidence)
-                add_cell(worksheet_out, 10, line, label)
+                add_cell(worksheet, 9, line, latitude)
+                add_cell(worksheet, 10, line, longitude)
+                add_cell(worksheet, 11, line, confidence)
+                add_cell(worksheet, 12, line, region)
+                add_cell(worksheet, 13, line, region_code)
+                add_cell(worksheet, 14, line, country)
+                add_cell(worksheet, 15, line, locality)
+                add_cell(worksheet, 16, line, administrative_area)
+                add_cell(worksheet, 17, line, neighbourhood)
+                add_cell(worksheet, 18, line, country)
+                add_cell(worksheet, 19, line, country_code)
+                add_cell(worksheet, 20, line, continent)
+                add_cell(worksheet, 21, line, label)
             else:
-                print(f"{name} => ??????????????????????")
+                print(f"{name} => Not found")
+                for colnum in range(9, 22):
+                    add_cell(worksheet, colnum, line, "")
         except Exception as e:
             print(f"Error: Line {line} - {name}")
             print(e)
@@ -105,15 +141,16 @@ def process(infile:str, outfile:str):
         finally:
             pass
 
-        time.sleep(0.5)
-        line += 1
-        #break
+        time.sleep(0.2)
 
-    print("Writing...")
-    workbook_out.save(outfile)
+    if changed:
+        print("Writing...")
+        workbook.save(infile)
+    else:
+        print("No changes")
 
 def main():
-    global api_key
+    global api_key, process_mode
     load_dotenv()
     env_path = Path('.')
     env_file = '.env'
@@ -121,25 +158,27 @@ def main():
     api_key = os.getenv("API_KEY")
 
     parser = argparse.ArgumentParser()
-    parser.add_argument("inputfile", help = "Name of the input Excel file")
-    parser.add_argument("outputfile", help = "Name of Excel file to write results to")
+    parser.add_argument("inputfile", help = "Name of the Excel file with addresses")
+    parser.add_argument("-e", "--update", action = "store_true", help = "Update the rows where longitude or latitude are empty. (the default)")
+    parser.add_argument("-r", "--redo", action = "store_true", help = "Update the rows where longitude or latitude are empty, or where the confidence is not equal to 1.")
     args = parser.parse_args()
+
+    if args.update:
+        process_mode = 1
+    if args.redo:
+        process_mode = 2
 
     if os.path.isfile(args.inputfile) == False:
         print(f"Error: file not found: {args.inputfile}")
         return
 
     infile = args.inputfile
-    outfile = args.outputfile
 
     if infile[-5:].lower() != ".xlsx":
         print("Error: inputfile must be an .xlsx file")
         return
 
-    if outfile[-5:].lower() != ".xlsx":
-        outfile += ".xlsx"
-
-    process(infile, outfile)
+    process(infile)
 
 if __name__ == "__main__":
     main()

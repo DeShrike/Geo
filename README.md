@@ -1,4 +1,4 @@
-# Forward Geo Locating 
+# Forward Geo Location
 
 Uses PositionStack API
 
@@ -9,8 +9,9 @@ Clone this repo
 Then run:
 
 ```
-python3 -m venv env
-source env/bin/activate
+python3 -m venv venv
+source venv/bin/activate (Linux)
+venv\bin\activate.bat    (Windows)
 pip3 install -r requirements.txt 
 ```
 
@@ -20,15 +21,49 @@ Create an account at https://positionstack.com/
 
 Put your API key in .env (see sample_dot_env)
 
-Addresses are read from an Excel file
-
-Results are written to an Excel file
+Addresses are read from an Excel file and coordinates are written back to the same Excel file
 
 See sample_addresses.xlsx and sample_results.xlsx
 
 Run:
 
 ```
-python3 main.py addressfile.xlsx outfile.xlsx
+python3 main.py addressfile.xlsx
 ```
+
+Options:
+
+-e : Update the rows where longitude or latitude are empty. (the default)
+-r : Update the rows where longitude or latitude are empty, or where the confidence is not equal to 1.
+
+## Excel file format
+
+One the first worksheet is read.
+
+Row 1 should be a headerrow.
+
+- Column A: A name. Not used during the geolocation.
+- Column B: The address.
+- Column C: The zip code.
+- Column D: The City.
+- Column E: Not used.
+- Column F: Not used.
+- Column G: The country.
+- Column H: The country code.
+
+The results are written back to Columns I-K:
+
+- Column I: The longitude.
+- Column J: The latitude.
+- Column K: A confidence score.
+- Column L: Region
+- Column M: Region Code
+- Column N: County
+- Column O: Locality
+- Column P: Administrative Area
+- Column Q: Neighbourhood
+- Column R: Country
+- Column S: Country Code
+- Column T: Continent
+- Column U: Label
 
