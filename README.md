@@ -2,7 +2,7 @@
 
 Uses PositionStack API
 
-## Install
+## Installation
 
 Clone this repo
 
@@ -23,9 +23,9 @@ Rename sample_dot_env to .env
 
 Open .env in a text editor and add your API key.
 
-Addresses are read from an Excel file and coordinates are written back to the same Excel file
+Addresses are read from an Excel file and coordinates are written back to the same Excel file.
 
-See sample_addresses.xlsx and sample_result.xlsx
+See sample_addresses.xlsx (the 'before') and sample_result.xlsx (the 'after').
 
 Run:
 
@@ -36,6 +36,7 @@ python3 main.py <name of Excel file>
 Options:
 
 -u : Update the rows where longitude or latitude are empty. (the default)
+
 -r : Update the rows where longitude or latitude are empty, or where the confidence is not equal to 1.
 
 ## Excel file format
@@ -53,7 +54,7 @@ Row 1 should be a header row.
 - Column G: Not used
 - Column H: The country code
 
-The results are written back to Columns I-K:
+The results are written back to columns I-U:
 
 - Column I: The longitude
 - Column J: The latitude
