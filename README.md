@@ -19,43 +19,45 @@ pip3 install -r requirements.txt
 
 Create an account at https://positionstack.com/
 
-Put your API key in .env (see sample_dot_env)
+Rename sample_dot_env to .env 
+
+Open .env in a text editor and add your API key.
 
 Addresses are read from an Excel file and coordinates are written back to the same Excel file
 
-See sample_addresses.xlsx and sample_results.xlsx
+See sample_addresses.xlsx and sample_result.xlsx
 
 Run:
 
 ```
-python3 main.py addressfile.xlsx
+python3 main.py <name of Excel file>
 ```
 
 Options:
 
--e : Update the rows where longitude or latitude are empty. (the default)
+-u : Update the rows where longitude or latitude are empty. (the default)
 -r : Update the rows where longitude or latitude are empty, or where the confidence is not equal to 1.
 
 ## Excel file format
 
-One the first worksheet is read.
+Only the first worksheet is read.
 
-Row 1 should be a headerrow.
+Row 1 should be a header row.
 
-- Column A: A name. Not used during the geolocation.
-- Column B: The address.
-- Column C: The zip code.
-- Column D: The City.
-- Column E: Not used.
-- Column F: Not used.
-- Column G: The country.
-- Column H: The country code.
+- Column A: A name, not used during the geolocation
+- Column B: The address
+- Column C: The zip code
+- Column D: The City
+- Column E: Not used
+- Column F: Not used
+- Column G: Not used
+- Column H: The country code
 
 The results are written back to Columns I-K:
 
-- Column I: The longitude.
-- Column J: The latitude.
-- Column K: A confidence score.
+- Column I: The longitude
+- Column J: The latitude
+- Column K: A confidence score
 - Column L: Region
 - Column M: Region Code
 - Column N: County

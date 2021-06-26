@@ -159,7 +159,7 @@ def main():
 
     parser = argparse.ArgumentParser()
     parser.add_argument("inputfile", help = "Name of the Excel file with addresses")
-    parser.add_argument("-e", "--update", action = "store_true", help = "Update the rows where longitude or latitude are empty. (the default)")
+    parser.add_argument("-u", "--update", action = "store_true", help = "Update the rows where longitude or latitude are empty. (the default)")
     parser.add_argument("-r", "--redo", action = "store_true", help = "Update the rows where longitude or latitude are empty, or where the confidence is not equal to 1.")
     args = parser.parse_args()
 
