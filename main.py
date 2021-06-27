@@ -2,7 +2,7 @@ from dotenv import load_dotenv
 from pathlib import Path
 from openpyxl import Workbook, load_workbook
 from openpyxl.utils import get_column_letter
-from openpyxl.styles import Font
+from openpyxl.styles import Font, Color, PatternFill
 import os
 import argparse
 import requests
@@ -10,6 +10,11 @@ import urllib.parse
 import time
 
 # https://positionstack.com/documentation
+
+COLOR_BLACK = "000000"
+COLOR_WHITE = "FFFFFF"
+COLOR_RED = "FF5959"
+COLOR_ORANGE = "FFDF50"
 
 api_key = None
 process_mode = 1    # 1 = only if coordinates are empty
@@ -44,6 +49,11 @@ def add_cell(sheet, column, row, value, bold = False):
     c.value = value
     if bold:
         c.font = Font(bold = True)
+
+def set_cell_color(sheet, column, row, color):
+    char = get_column_letter(column)
+    c = sheet[char + str(row)]
+    c.fill = PatternFill(patternType = "solid", fgColor = color)
 
 def process(infile:str):
     print("Reading...")
@@ -129,10 +139,23 @@ def process(infile:str):
                 add_cell(worksheet, 19, line, country_code)
                 add_cell(worksheet, 20, line, continent)
                 add_cell(worksheet, 21, line, label)
+
+                if confidence == 1:
+                    set_cell_color(worksheet, 1, line, COLOR_WHITE)
+                    set_cell_color(worksheet, 9, line, COLOR_WHITE)
+                    set_cell_color(worksheet, 10, line, COLOR_WHITE)
+                    set_cell_color(worksheet, 11, line, COLOR_WHITE)
+                else:
+                    set_cell_color(worksheet, 1, line, COLOR_ORANGE)
+                    set_cell_color(worksheet, 9, line, COLOR_ORANGE)
+                    set_cell_color(worksheet, 10, line, COLOR_ORANGE)
+                    set_cell_color(worksheet, 11, line, COLOR_ORANGE)
             else:
                 print(f"{name} => Not found")
                 for colnum in range(9, 22):
                     add_cell(worksheet, colnum, line, "")
+                    set_cell_color(worksheet, 1, line, COLOR_RED)
+
         except Exception as e:
             print(f"Error: Line {line} - {name}")
             print(e)
